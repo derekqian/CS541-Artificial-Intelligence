@@ -24,6 +24,78 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#define DEBUG 1
+#ifdef DEBUG
+#define DEBUGMSG(cond, msg) if(cond)printf msg;
+#else
+#define DEBUGMSG(cond, msg) 
+#endif
+
+void copyright() {
+  printf("dinner_party version 1.00.0\n");
+  printf("Copyright 2012 - 2012 Derek Qian - http://web.cecs.pdx.edu/~dejun\n");
+}
+
+void usage() {
+  printf("Usage: dinner_party [input output]\n");
+  printf("  if input and output are not provided, then the program will receive input from standard input and output to standard output.\n");
+}
+
 int main(int argc, char** argv) {
+  int i;
+  FILE* infile = NULL;
+  FILE* outfile = NULL;
+
+  if(argc == 1) {
+    infile = stdin;
+    outfile = stdout;
+  } else if(argc == 3) {
+    infile = fopen(argv[1], "r+");
+    if(infile == NULL) {
+      printf("main: open input file (%s) failed\n", argv[1]);
+      goto quit_point;
+    }
+    outfile = fopen(argv[2], "w+");
+    if(outfile == NULL) {
+      printf("main: open output file (%s) failed\n", argv[2]);
+      goto quit_point;
+    }
+  } else {
+    copyright();
+    usage();
+    goto quit_point;
+  }
+
+  int people_num;
+  int* preference = NULL;
+  if(1 != fscanf(infile, "%d", &people_num)) {
+    printf("main: read the number of people failed\n");
+    goto quit_point;
+  }
+  DEBUGMSG(1, ("people_num = %d\n", people_num));
+  preference = malloc(people_num*people_num*sizeof(int));
+  if(preference == NULL) {
+    printf("main: allocate memory failed\n");
+    goto quit_point;
+  }
+  for(i=0; i<people_num*people_num; i++) {
+    if(1 != fscanf(infile, "%d", preference+i)) {
+      printf("main: read preference data failed\n");
+      goto quit_point;
+    }
+    DEBUGMSG(0, ("%i - %d\n", i, preference[i]));
+  }
+
+quit_point:
+  if(preference != NULL) {
+    free(preference);
+  }
+  if(outfile != NULL && outfile != stdout) {
+    fclose(outfile);
+  }
+  if(infile != NULL && infile != stdin) {
+    fclose(infile);
+  }
+
   return 0;
 }
