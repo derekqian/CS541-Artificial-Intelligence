@@ -19,6 +19,14 @@
  * The data is given to you in the form of an ASCII text file that has the even number n of people on the first line. The first n/2 people are assumed to be female, the rest male. The preference matrix follows on the remaining lines: rows with values separated by spaces. The people are assumed to be numbered 1..n. The seats are assumed to be numbered such that the top half of the table has seats 1..n/2 left-to-right, and the bottom half of the table has seats n/2+1..n left-to-right; thus seat n/2 is opposite seat n.
  *
  * The output should be a score, then a series of n rows, each with a person number, then a space, then a seat number.
+ * --------------------------------------------------------------------------
+ * Construct a program that solves instances of the problem read from an instance file or, if you prefer, stdin, and writes the solution to a solution file or, if you prefer, stdout. You may use any programming language you like. I strongly recommend the use of a build tool such as make, and a source-code management system such as Git or Mercurial.
+ *
+ * There are three instances I want you to run on: hw1-inst1.txt, hw1-inst2.txt, hw1-inst3.txt. Please produce output files hw1-soln1.txt, hw1-soln2.txt, hw1-soln3.txt containing the best solutions you found in just 60 seconds of runtime.
+ *
+ * Turn in a tar or zip archive of your source code including the SCMS repository (if possible), your solution files, and a brief writeup saying how your code works, how to build it, how it did, and any other info you think I might find interesting. Describe the hardware and software setup under which you did the experiments. Be sure to put a copyright notice on your source code, and your name and email on your writeup. Do not include object files, executable files, or other large binary files that are likely useless to me.
+ *
+ * Above all, have fun!
  */
 
 #include <stdlib.h>
@@ -85,6 +93,8 @@ int main(int argc, char** argv) {
     }
     DEBUGMSG(0, ("%i - %d\n", i, preference[i]));
   }
+
+
 
 quit_point:
   if(preference != NULL) {
