@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+typedef _Bool bool;
+
 struct node {
   void* data;
   struct node* prev;
@@ -9,9 +11,16 @@ struct node {
 static struct node* head = NULL;
 static struct node* tail = NULL;
 
-int empty() {
-  return (head == NULL) ? 0 : -1;
+#if 0
+bool empty() {
+  return (head==NULL);
 }
+#else
+bool empty() {
+  bool res = (head==NULL);
+  return res;
+}
+#endif
 
 void push(void* data) {
   if(head == NULL) {
@@ -28,7 +37,7 @@ void push(void* data) {
 }
 
 void* pop() {
-  if(empty() == 0) {
+  if(empty()) {
     return NULL;
   } else {
     void* data = tail->data;
@@ -38,6 +47,7 @@ void* pop() {
       head = NULL;
     }
     free(temp);
+    return data;
   }
 }
 
@@ -46,6 +56,7 @@ void dump() {
   printf("dump stack\n");
   while(temp != NULL) {
     printf("0x%08x ", (unsigned int)(temp->data));
+    temp = temp->prev;
   }
   printf("\n");
 }

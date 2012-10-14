@@ -31,6 +31,8 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <assert.h>
+#include <string.h>
 
 #define DEBUG 1
 #ifdef DEBUG
@@ -39,14 +41,55 @@
 #define DEBUGMSG(cond, msg) 
 #endif
 
+// definition of structures
+/*
+ */
+struct state {
+  int total;
+  int assigned;
+  int assignment[0]; 
+};
+
+// global variables
+int people_num;
+int* preference = NULL;
+
 void copyright() {
   printf("dinner_party version 1.00.0\n");
   printf("Copyright 2012 - 2012 Derek Qian - http://web.cecs.pdx.edu/~dejun\n");
 }
 
 void usage() {
-  printf("Usage: dinner_party [input output]\n");
-  printf("  if input and output are not provided, then the program will receive input from standard input and output to standard output.\n");
+  printf("Usage: dinner_party [input]\n");
+  printf("  if input are not provided, then the program will receive input from standard input and output to standard output.\n");
+}
+
+void swap(int* buf, int ind1, int ind2) {
+  assert(buf != NULL);
+  if(ind1 == ind2) return;
+  int temp = buf[ind1];
+  buf[ind1] = buf[ind2];
+  buf[ind2] = temp;
+}
+
+/*
+ * return the gender of people p
+ *     0 - female
+ *     1 - male
+ */
+int g(int p) {
+  return (p < people_num/2) ? 0 : 1;
+}
+
+/*
+ * return the preference which indicates how p1 likes p2.
+ */
+int h(int p1, int p2) {
+  return preference[p1*people_num+p2];
+}
+
+int score(struct state* ps) {
+  return 0;
 }
 
 int main(int argc, char** argv) {
@@ -57,15 +100,25 @@ int main(int argc, char** argv) {
   if(argc == 1) {
     infile = stdin;
     outfile = stdout;
-  } else if(argc == 3) {
+  } else if(argc == 2) {
+    if(0!=strcmp(argv[1], "hw1-inst1.txt") && 0!=strcmp(argv[1], "hw1-inst2.txt") && 0!=strcmp(argv[1], "hw1-inst3.txt")) {
+      printf("main: input file name not supported\n");
+      goto quit_point;
+    }
     infile = fopen(argv[1], "r+");
     if(infile == NULL) {
       printf("main: open input file (%s) failed\n", argv[1]);
       goto quit_point;
     }
-    outfile = fopen(argv[2], "w+");
+    char outfilename[16];
+    strcpy(outfilename, argv[1]);
+    outfilename[4] = 's';
+    outfilename[5] = 'o';
+    outfilename[6] = 'l';
+    outfilename[7] = 'n';
+    outfile = fopen(outfilename, "w+");
     if(outfile == NULL) {
-      printf("main: open output file (%s) failed\n", argv[2]);
+      printf("main: open output file (%s) failed\n", outfilename);
       goto quit_point;
     }
   } else {
@@ -74,8 +127,6 @@ int main(int argc, char** argv) {
     goto quit_point;
   }
 
-  int people_num;
-  int* preference = NULL;
   if(1 != fscanf(infile, "%d", &people_num)) {
     printf("main: read the number of people failed\n");
     goto quit_point;
@@ -91,12 +142,49 @@ int main(int argc, char** argv) {
       printf("main: read preference data failed\n");
       goto quit_point;
     }
-    DEBUGMSG(0, ("%i - %d\n", i, preference[i]));
   }
 
+  assert(empty());
+  struct state* pstate = malloc(sizeof(struct state) + people_num*sizeof(int));
+  if(pstate == NULL) {
+    printf("main: malloc for pstate failed\n");
+    goto quit_point;
+  }
+  pstate->total = people_num;
+  pstate->assigned = 0;
+  for(i=0; i<people_num; i++) {
+    pstate->assignment[i] = i;
+  }
+  push(pstate);
+  dump();
 
+  while(!empty()) {
+    pstate = (struct state*)pop();
+    dump();
+    for(i=pstate->total-1; i>=pstate->assigned; i--) {
+      struct state* tmpstate = malloc(sizeof(struct state) + people_num*sizeof(int));
+      if(tmpstate == NULL) {
+	printf("main: malloc for tmpstate failed\n");
+	goto quit_point;
+      }
+      memcpy(tmpstate, pstate, sizeof(struct state) + people_num*sizeof(int));
+      swap(tmpstate->assignment, i, tmpstate->assigned);
+      tmpstate->assigned++;
+      if(tmpstate->assigned == tmpstate->total) {
+	break;
+      } else {
+	push(tmpstate);
+      }
+    }
+    dump();
+    free(pstate);
+  }
 
 quit_point:
+  while(!empty()) {
+    pstate = (struct state*)pop();
+    free(pstate);
+  }
   if(preference != NULL) {
     free(preference);
   }
