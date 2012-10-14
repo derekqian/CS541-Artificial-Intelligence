@@ -33,6 +33,8 @@
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
+#include <sys/time.h>
+#include <signal.h>
 
 #define DEBUG 1
 #ifdef DEBUG
@@ -43,16 +45,28 @@
 
 // definition of structures
 /*
+ *      0   2   4      o
+ *   +-------------   ----+
+ *   |             ...    | 
+ *   +-------------   ----+ 
+ *      1   3   5      o
  */
 struct state {
   int total;
   int assigned;
+  int score;
   int assignment[0]; 
+};
+enum bool {
+  FALSE = 0,
+  TRUE
 };
 
 // global variables
+enum bool stopworking = FALSE;
 int people_num;
 int* preference = NULL;
+struct state* goal = NULL;
 
 void copyright() {
   printf("dinner_party version 1.00.0\n");
@@ -89,7 +103,44 @@ int h(int p1, int p2) {
 }
 
 int score(struct state* ps) {
-  return 0;
+  int i;
+  int s = 0;
+
+  // opposite
+  for(i=0; i<(people_num/2); i++) {
+    s += h(ps->assignment[i*2], ps->assignment[i*2+1]) + h(ps->assignment[i*2+1], ps->assignment[i*2]);
+    s += (g(ps->assignment[i*2]) == g(ps->assignment[i*2+1])) ? 0 : 2;
+  }
+
+  // next to each other
+  for(i=0; i<(people_num/2-1); i++) {
+    s += h(ps->assignment[i*2], ps->assignment[i*2+2]) + h(ps->assignment[i*2+2], ps->assignment[i*2]);
+    s += (g(ps->assignment[i*2]) == g(ps->assignment[i*2+2])) ? 0 : 1;
+    s += h(ps->assignment[i*2+1], ps->assignment[i*2+3]) + h(ps->assignment[i*2+3], ps->assignment[i*2+1]);
+    s += (g(ps->assignment[i*2+1]) == g(ps->assignment[i*2+3])) ? 0 : 1;
+  }
+
+  return s;
+}
+
+void dump_state(struct state* ps) {
+  int i;
+
+  printf("dump_state:\n");
+  printf("\ttotal = %d\n", ps->total);
+  printf("\tassigned = %d\n", ps->assigned);
+  printf("\tscore = %d\n", ps->score);
+  printf("\t");
+  for(i=0; i<ps->total; i++) {
+    printf("%02d ", ps->assignment[i]);
+  }
+  printf("\n");
+}
+
+void timer_handler(int param) {
+  printf("timer_handler\n");
+  stopworking = TRUE;
+  return;
 }
 
 int main(int argc, char** argv) {
@@ -144,6 +195,18 @@ int main(int argc, char** argv) {
     }
   }
 
+  // begin the real work
+  struct itimerval timersetting;
+  timersetting.it_value.tv_sec = 20;
+  timersetting.it_value.tv_usec = 0;
+  timersetting.it_interval.tv_sec = 0;
+  timersetting.it_interval.tv_usec = 0;
+  setitimer(ITIMER_VIRTUAL, &timersetting, NULL);
+  signal(SIGVTALRM, timer_handler);
+
+  // debug purpose only
+  struct state* laststate = malloc(sizeof(struct state) + people_num*sizeof(int));
+
   assert(empty());
   struct state* pstate = malloc(sizeof(struct state) + people_num*sizeof(int));
   if(pstate == NULL) {
@@ -152,15 +215,14 @@ int main(int argc, char** argv) {
   }
   pstate->total = people_num;
   pstate->assigned = 0;
+  pstate->score = 0;
   for(i=0; i<people_num; i++) {
     pstate->assignment[i] = i;
   }
   push(pstate);
-  dump();
 
-  while(!empty()) {
+  while(!empty() && !stopworking) {
     pstate = (struct state*)pop();
-    dump();
     for(i=pstate->total-1; i>=pstate->assigned; i--) {
       struct state* tmpstate = malloc(sizeof(struct state) + people_num*sizeof(int));
       if(tmpstate == NULL) {
@@ -171,16 +233,33 @@ int main(int argc, char** argv) {
       swap(tmpstate->assignment, i, tmpstate->assigned);
       tmpstate->assigned++;
       if(tmpstate->assigned == tmpstate->total) {
-	break;
+	tmpstate->score = score(tmpstate);
+	//dump_state(tmpstate);
+	memcpy(laststate, tmpstate, sizeof(struct state) + people_num*sizeof(int));
+	if(goal == NULL) {
+	  goal = tmpstate;
+	} else if(tmpstate->score > goal->score) {
+	  free(goal);
+	  goal = tmpstate;
+	} else {
+	  free(tmpstate);
+	}
       } else {
 	push(tmpstate);
       }
     }
-    dump();
     free(pstate);
   }
+  dump_state(goal);
+
+  // debug purpose only
+  dump_state(laststate);
+  free(laststate);
 
 quit_point:
+  if(goal != NULL) {
+    free(goal);
+  }
   while(!empty()) {
     pstate = (struct state*)pop();
     free(pstate);
