@@ -1,3 +1,9 @@
+/*
+ * dinner_party version 1.00.0
+ * Copyright 2012 - 2012 Dejun Qian - electronseu@gmail.com 
+ *                                  - http://web.cecs.pdx.edu/~dejun
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>

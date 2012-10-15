@@ -1,5 +1,10 @@
 /*
- *  Suppose you are given a set of n people (with n even) to be seated at a dinner party. The people will be seated along the two sides of a long table.
+ * dinner_party version 1.00.0
+ * Copyright 2012 - 2012 Dejun Qian - electronseu@gmail.com 
+ *                                  - http://web.cecs.pdx.edu/~dejun
+ *
+ *
+ * Suppose you are given a set of n people (with n even) to be seated at a dinner party. The people will be seated along the two sides of a long table.
  *
  *      o   o   o      o
  *   +-------------   ----+

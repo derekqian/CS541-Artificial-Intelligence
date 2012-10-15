@@ -15,4 +15,3 @@ clean :
 	rm dinner_party
 	rm *.o
 	rm verify
-	rm *soln*
