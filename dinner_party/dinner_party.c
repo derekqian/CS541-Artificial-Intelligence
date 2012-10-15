@@ -45,15 +45,16 @@
 
 // definition of structures
 /*
- *      0   2   4      o
+ *      0   2   4      n-2
  *   +-------------   ----+
  *   |             ...    | 
  *   +-------------   ----+ 
- *      1   3   5      o
+ *      1   3   5      n-1
  */
 struct state {
   int total;
   int assigned;
+  int rotate; // rotate left
   int score;
   int assignment[0]; 
 };
@@ -103,6 +104,32 @@ int h(int p1, int p2) {
   return preference[p1*people_num+p2];
 }
 
+int neighbor_score(struct state* ps, int col) {
+  int s = 0;
+  int p0 = (col*2)%people_num;
+  int p1 = (col*2+1)%people_num;
+  int p2 = (col*2+2)%people_num;
+  int p3 = (col*2+3)%people_num;
+  s += h(ps->assignment[p0], ps->assignment[p2]) + h(ps->assignment[p2], ps->assignment[p0]);
+  s += (g(ps->assignment[p0]) == g(ps->assignment[p2])) ? 0 : 1;
+  s += h(ps->assignment[p1], ps->assignment[p3]) + h(ps->assignment[p3], ps->assignment[p1]);
+  s += (g(ps->assignment[p1]) == g(ps->assignment[p3])) ? 0 : 1;
+  return s;
+}
+
+int max_col(struct state* ps) {
+  int i;
+  int col = ps->total/2-1;
+  int score = neighbor_score(ps, ps->total/2-1);
+  for(i=0; i<(ps->total/2-1); i++) {
+    if(neighbor_score(ps, i) > score) {
+      col = i;
+      score = neighbor_score(ps, i);
+    }
+  }
+  return col;
+}
+
 int score(struct state* ps) {
   int i;
   int s = 0;
@@ -114,11 +141,15 @@ int score(struct state* ps) {
   }
 
   // next to each other
-  for(i=0; i<(people_num/2-1); i++) {
-    s += h(ps->assignment[i*2], ps->assignment[i*2+2]) + h(ps->assignment[i*2+2], ps->assignment[i*2]);
-    s += (g(ps->assignment[i*2]) == g(ps->assignment[i*2+2])) ? 0 : 1;
-    s += h(ps->assignment[i*2+1], ps->assignment[i*2+3]) + h(ps->assignment[i*2+3], ps->assignment[i*2+1]);
-    s += (g(ps->assignment[i*2+1]) == g(ps->assignment[i*2+3])) ? 0 : 1;
+  for(i=(0+ps->rotate); i<(people_num/2-1); i++) {
+    int p0 = (i*2)%people_num;
+    int p1 = (i*2+1)%people_num;
+    int p2 = (i*2+2)%people_num;
+    int p3 = (i*2+3)%people_num;
+    s += h(ps->assignment[p0], ps->assignment[p2]) + h(ps->assignment[p2], ps->assignment[p0]);
+    s += (g(ps->assignment[p0]) == g(ps->assignment[p2])) ? 0 : 1;
+    s += h(ps->assignment[p1], ps->assignment[p3]) + h(ps->assignment[p3], ps->assignment[p1]);
+    s += (g(ps->assignment[p1]) == g(ps->assignment[p3])) ? 0 : 1;
   }
 
   return s;
@@ -130,6 +161,7 @@ void dump_state(struct state* ps) {
   printf("dump_state:\n");
   printf("\ttotal = %d\n", ps->total);
   printf("\tassigned = %d\n", ps->assigned);
+  printf("\trotate = %d\n", ps->rotate);
   printf("\tscore = %d\n", ps->score);
   printf("\t");
   for(i=0; i<ps->total; i++) {
@@ -216,6 +248,7 @@ int main(int argc, char** argv) {
   }
   pstate->total = people_num;
   pstate->assigned = 0;
+  pstate->rotate = 0;
   pstate->score = 0;
   for(i=0; i<people_num; i++) {
     pstate->assignment[i] = i;
@@ -242,6 +275,7 @@ int main(int argc, char** argv) {
 #endif
       tmpstate->assigned++;
       if(tmpstate->assigned == tmpstate->total) {
+	tmpstate->rotate = max_col(tmpstate);
 	tmpstate->score = score(tmpstate);
 	//dump_state(tmpstate);
 	memcpy(laststate, tmpstate, sizeof(struct state) + people_num*sizeof(int));
