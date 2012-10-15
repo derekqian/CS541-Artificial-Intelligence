@@ -230,7 +230,16 @@ int main(int argc, char** argv) {
 	goto quit_point;
       }
       memcpy(tmpstate, pstate, sizeof(struct state) + people_num*sizeof(int));
+#if 0
       swap(tmpstate->assignment, i, tmpstate->assigned);
+#else
+      int j;
+      int tmpval = tmpstate->assignment[i];
+      for(j=i; j>tmpstate->assigned; j--) {
+	tmpstate->assignment[j] = tmpstate->assignment[j-1];
+      }
+      tmpstate->assignment[tmpstate->assigned] = tmpval;
+#endif
       tmpstate->assigned++;
       if(tmpstate->assigned == tmpstate->total) {
 	tmpstate->score = score(tmpstate);
