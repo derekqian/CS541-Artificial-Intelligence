@@ -36,15 +36,16 @@
 #include <sys/time.h>
 #include <signal.h>
 
-#define DEBUG 1
-#ifdef DEBUG
+#define DEBUG 0
+#if DEBUG
 #define DEBUGMSG(cond, msg) if(cond)printf msg;
 #else
 #define DEBUGMSG(cond, msg) 
 #endif
 
 #define RUN_TIME 60
-#define MAX_WASTE_NUM 1000000
+#define MAX_WASTE_NUM 350
+#define FIXED_DEPTH 3
 
 // definition of structures
 /*
@@ -73,7 +74,7 @@ int* preference = NULL;
 struct state* goal = NULL;
 int update_num = 0;
 int wasted_num = 0;
-int back_depth = 0;
+int back_depth = FIXED_DEPTH;
 
 void copyright() {
   printf("dinner_party version 1.00.0\n");
@@ -147,7 +148,7 @@ int score(struct state* ps) {
   }
 
   // next to each other
-  for(i=(0+ps->rotate); i<(ps->assigned/2-1); i++) {
+  for(i=(0+ps->rotate); i<(ps->assigned/2-1+ps->rotate); i++) {
     int p0 = (i*2)%ps->total;
     int p1 = (i*2+1)%ps->total;
     int p2 = (i*2+2)%ps->total;
@@ -268,8 +269,6 @@ int main(int argc, char** argv) {
     pstate->assignment[i] = i;
   }
   push(pstate);
-
-  back_depth = people_num;
 
   while(!empty() && !stopworking) {
     pstate = (struct state*)pop();
@@ -410,7 +409,6 @@ int main(int argc, char** argv) {
 	  goal = tmpstate;
 	  update_num++;
 	  wasted_num = 0;
-	  back_depth = people_num;
 	} else {
 	  free(tmpstate);
 	  wasted_num++;
@@ -421,14 +419,12 @@ int main(int argc, char** argv) {
     }
     free(ind);
     free(pstate);
-    if(wasted_num == MAX_WASTE_NUM) {
+#if 1
+    if(wasted_num == MAX_WASTE_NUM && people_num > 15) {
       wasted_num = 0;
-      if(back_depth > 1) {
-	back_depth--;
-      }
       while(!empty()) {
 	pstate = (struct state*)pop();
-	if(pstate->assigned == back_depth) {
+	if(pstate->assigned <= back_depth) {
 	  push(pstate);
 	  break;
 	} else {
@@ -436,13 +432,23 @@ int main(int argc, char** argv) {
 	}
       }
     }
+#endif
   }
-  dump_state(goal);
-  printf("updated %d times\n", update_num);
+  //dump_state(goal);
+  //printf("updated %d times\n", update_num);
 
   // debug purpose only
-  dump_state(laststate);
+  //dump_state(laststate);
   free(laststate);
+
+  // write result
+  fprintf(outfile, "%d\n", goal->score);
+  for(i=0+goal->rotate; i<goal->total/2+goal->rotate; i++) {
+    fprintf(outfile, "%d %d\n", goal->assignment[(2*i)%goal->total], i-goal->rotate);
+  }
+  for(i=0+goal->rotate; i<goal->total/2+goal->rotate; i++) {
+    fprintf(outfile, "%d %d\n", goal->assignment[(2*i+1)%goal->total], i+goal->total/2-goal->rotate);
+  }
 
 quit_point:
   if(goal != NULL) {
