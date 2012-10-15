@@ -275,13 +275,12 @@ int main(int argc, char** argv) {
       memcpy(tmpstate, pstate, sizeof(struct state) + people_num*sizeof(int));
 #if 0
       swap(tmpstate->assignment, i, tmpstate->assigned);
-#elif 0
+#else
       int tmpval = tmpstate->assignment[i];
       for(j=i; j>tmpstate->assigned; j--) {
 	tmpstate->assignment[j] = tmpstate->assignment[j-1];
       }
       tmpstate->assignment[tmpstate->assigned] = tmpval;
-#else
 #endif
       tmpstate->assigned++;
       if(tmpstate->assigned == tmpstate->total) {
