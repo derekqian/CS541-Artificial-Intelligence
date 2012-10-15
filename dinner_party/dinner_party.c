@@ -67,6 +67,7 @@ enum bool stopworking = FALSE;
 int people_num;
 int* preference = NULL;
 struct state* goal = NULL;
+int update_num = 0;
 
 void copyright() {
   printf("dinner_party version 1.00.0\n");
@@ -144,7 +145,7 @@ void timer_handler(int param) {
 }
 
 int main(int argc, char** argv) {
-  int i;
+  int i, j;
   FILE* infile = NULL;
   FILE* outfile = NULL;
 
@@ -233,7 +234,6 @@ int main(int argc, char** argv) {
 #if 0
       swap(tmpstate->assignment, i, tmpstate->assigned);
 #else
-      int j;
       int tmpval = tmpstate->assignment[i];
       for(j=i; j>tmpstate->assigned; j--) {
 	tmpstate->assignment[j] = tmpstate->assignment[j-1];
@@ -250,6 +250,7 @@ int main(int argc, char** argv) {
 	} else if(tmpstate->score > goal->score) {
 	  free(goal);
 	  goal = tmpstate;
+	  update_num++;
 	} else {
 	  free(tmpstate);
 	}
@@ -260,6 +261,7 @@ int main(int argc, char** argv) {
     free(pstate);
   }
   dump_state(goal);
+  printf("updated %d times\n", update_num);
 
   // debug purpose only
   dump_state(laststate);
