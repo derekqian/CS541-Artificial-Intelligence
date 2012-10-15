@@ -239,7 +239,7 @@ int main(int argc, char** argv) {
 
   // begin the real work
   struct itimerval timersetting;
-  timersetting.it_value.tv_sec = 20;
+  timersetting.it_value.tv_sec = 5;
   timersetting.it_value.tv_usec = 0;
   timersetting.it_interval.tv_sec = 0;
   timersetting.it_interval.tv_usec = 0;
@@ -266,6 +266,45 @@ int main(int argc, char** argv) {
 
   while(!empty() && !stopworking) {
     pstate = (struct state*)pop();
+    int* ind = malloc(pstate->total*sizeof(int));
+    if(ind == NULL) {
+      printf("main: malloc for ind failed\n");
+      goto quit_point;
+    }
+    for(i=0; i<pstate->total; i++) {
+      ind[i] = i;
+    }
+#if 1
+    if(pstate->assigned == 0) {
+      int tempscore = h(0,1)+h(1,0);
+      int ii = 0, jj = 1;
+      for(i=1; i<people_num; i++) {
+	for(j=0; j<i; j++) {
+	  int temp = (g(i)==g(j)) ? 0 : 2;
+	  temp += h(i,j) + h(j,i);
+	  if(temp > tempscore) {
+	    ii = i;
+	    jj = j;
+	    tempscore = temp;
+	  }
+	}
+      }
+      if(ii != 1) {
+	swap(ind, 1, jj);
+      }
+    }
+    int* partialscore = malloc(pstate->total*sizeof(int));
+    if(partialscore == NULL) {
+      printf("main: malloc for partialscore failed\n");
+      goto quit_point;
+    }
+    pstate->assigned++;
+    for(i=pstate->assigned; i<pstate->total; i++) {
+      int partialscore = score(pstate);
+      for()
+    }
+    pstate->assigned--;
+#endif
     for(i=pstate->total-1; i>=pstate->assigned; i--) {
       struct state* tmpstate = malloc(sizeof(struct state) + people_num*sizeof(int));
       if(tmpstate == NULL) {
@@ -273,8 +312,8 @@ int main(int argc, char** argv) {
 	goto quit_point;
       }
       memcpy(tmpstate, pstate, sizeof(struct state) + people_num*sizeof(int));
-#if 0
-      swap(tmpstate->assignment, i, tmpstate->assigned);
+#if 1
+      swap(tmpstate->assignment, ind[i], tmpstate->assigned);
 #else
       int tmpval = tmpstate->assignment[i];
       for(j=i; j>tmpstate->assigned; j--) {
@@ -301,6 +340,8 @@ int main(int argc, char** argv) {
 	push(tmpstate);
       }
     }
+    free(partialscore);
+    free(ind);
     free(pstate);
   }
   dump_state(goal);
