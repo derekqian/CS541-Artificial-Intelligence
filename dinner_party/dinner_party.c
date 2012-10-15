@@ -239,7 +239,7 @@ int main(int argc, char** argv) {
 
   // begin the real work
   struct itimerval timersetting;
-  timersetting.it_value.tv_sec = 5;
+  timersetting.it_value.tv_sec = 60;
   timersetting.it_value.tv_usec = 0;
   timersetting.it_interval.tv_sec = 0;
   timersetting.it_interval.tv_usec = 0;
@@ -276,34 +276,103 @@ int main(int argc, char** argv) {
     }
 #if 1
     if(pstate->assigned == 0) {
-      int tempscore = h(0,1)+h(1,0);
-      int ii = 0, jj = 1;
+      int* tempscore = malloc(people_num*sizeof(int));
+      if(tempscore == NULL) {
+	printf("main: malloc for tempscore failed\n");
+	goto quit_point;
+      }
+      int* ii = malloc(people_num*sizeof(int));
+      if(ii == NULL) {
+	printf("main: malloc for ii failed\n");
+	goto quit_point;
+      }
+      int* jj = malloc(people_num*sizeof(int));
+      if(jj == NULL) {
+	printf("main: malloc for jj failed\n");
+	goto quit_point;
+      }
       for(i=1; i<people_num; i++) {
+	tempscore[i] = h(i,0) + h(0,i);
+	ii[i] = i;
+	jj[i] = 0;
 	for(j=0; j<i; j++) {
 	  int temp = (g(i)==g(j)) ? 0 : 2;
 	  temp += h(i,j) + h(j,i);
-	  if(temp > tempscore) {
-	    ii = i;
-	    jj = j;
-	    tempscore = temp;
+	  if(temp > tempscore[i]) {
+	    ii[i] = i;
+	    jj[i] = j;
+	    tempscore[i] = temp;
 	  }
 	}
       }
-      if(ii != 1) {
-	swap(ind, 1, jj);
+
+      // bubble sort (1, people_num-1)
+      for(i=people_num-1; i>1; i--) {
+	for(j=1; j<i; j++) {
+	  if(tempscore[j] < tempscore[j+1]) {
+	    swap(tempscore, j, j+1);
+	    swap(ii, j, j+1);
+	    swap(jj, j, j+1);
+	  }
+	}
       }
+
+      ind[0] = ii[1];
+      ind[1] = jj[1];
+      for(i=2; i<people_num;) { // dest
+	for(j=2; j<people_num; j++) { // src
+	  int k;
+	  for(k=0; k<i; k++) {
+	    if(ind[k] == ii[j]) {
+	      break;
+	    }
+	  }
+	  if(k == i) {
+	    ind[i++] = ii[j];
+	  }
+	  for(k=0; k<i; k++) {
+	    if(ind[k] == jj[j]) {
+	      break;
+	    }
+	  }
+	  if(k == i) {
+	    ind[i++] = jj[j];
+	  }
+	}
+      }
+
+      /*printf("ind\n");
+      for(i=0; i<people_num; i++) {
+	printf("%d ", ind[i]);
+      }
+      printf("\n");*/
+
+      free(jj);
+      free(ii);
+      free(tempscore);
+    } else {
+      int* partialscore = malloc(pstate->total*sizeof(int));
+      if(partialscore == NULL) {
+	printf("main: malloc for partialscore failed\n");
+	goto quit_point;
+      }
+      pstate->assigned++;
+      for(i=pstate->assigned-1; i<pstate->total; i++) {
+	swap(pstate->assignment, pstate->assigned-1, i);
+	partialscore[i] = score(pstate);
+	swap(pstate->assignment, pstate->assigned-1, i);
+      }
+      pstate->assigned--;
+      for(i=pstate->total-1; i>pstate->assigned; i--) {
+	for(j=pstate->assigned; j<i; j++) {
+	  if(partialscore[j] < partialscore[j+1]) {
+	    swap(partialscore, j, j+1);
+	    swap(ind, j, j+1);
+	  }
+	}
+      }
+      free(partialscore);
     }
-    int* partialscore = malloc(pstate->total*sizeof(int));
-    if(partialscore == NULL) {
-      printf("main: malloc for partialscore failed\n");
-      goto quit_point;
-    }
-    pstate->assigned++;
-    for(i=pstate->assigned; i<pstate->total; i++) {
-      int partialscore = score(pstate);
-      for()
-    }
-    pstate->assigned--;
 #endif
     for(i=pstate->total-1; i>=pstate->assigned; i--) {
       struct state* tmpstate = malloc(sizeof(struct state) + people_num*sizeof(int));
@@ -340,7 +409,6 @@ int main(int argc, char** argv) {
 	push(tmpstate);
       }
     }
-    free(partialscore);
     free(ind);
     free(pstate);
   }
