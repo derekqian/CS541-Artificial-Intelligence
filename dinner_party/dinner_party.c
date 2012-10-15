@@ -119,6 +119,7 @@ int neighbor_score(struct state* ps, int col) {
 
 int max_col(struct state* ps) {
   int i;
+  assert(ps->assigned == ps->total);
   int col = ps->total/2-1;
   int score = neighbor_score(ps, ps->total/2-1);
   for(i=0; i<(ps->total/2-1); i++) {
@@ -135,21 +136,29 @@ int score(struct state* ps) {
   int s = 0;
 
   // opposite
-  for(i=0; i<(people_num/2); i++) {
+  for(i=0; i<(ps->assigned/2); i++) {
     s += h(ps->assignment[i*2], ps->assignment[i*2+1]) + h(ps->assignment[i*2+1], ps->assignment[i*2]);
     s += (g(ps->assignment[i*2]) == g(ps->assignment[i*2+1])) ? 0 : 2;
   }
 
   // next to each other
-  for(i=(0+ps->rotate); i<(people_num/2-1); i++) {
-    int p0 = (i*2)%people_num;
-    int p1 = (i*2+1)%people_num;
-    int p2 = (i*2+2)%people_num;
-    int p3 = (i*2+3)%people_num;
+  for(i=(0+ps->rotate); i<(ps->assigned/2-1); i++) {
+    int p0 = (i*2)%ps->total;
+    int p1 = (i*2+1)%ps->total;
+    int p2 = (i*2+2)%ps->total;
+    int p3 = (i*2+3)%ps->total;
     s += h(ps->assignment[p0], ps->assignment[p2]) + h(ps->assignment[p2], ps->assignment[p0]);
     s += (g(ps->assignment[p0]) == g(ps->assignment[p2])) ? 0 : 1;
     s += h(ps->assignment[p1], ps->assignment[p3]) + h(ps->assignment[p3], ps->assignment[p1]);
     s += (g(ps->assignment[p1]) == g(ps->assignment[p3])) ? 0 : 1;
+  }
+
+  if(ps->assigned>2 && (ps->assigned%2)==1) {
+    assert(ps->rotate == 0);
+    int p0 = ps->assigned-3;
+    int p2 = ps->assigned-1;
+    s += h(ps->assignment[p0], ps->assignment[p2]) + h(ps->assignment[p2], ps->assignment[p0]);
+    s += (g(ps->assignment[p0]) == g(ps->assignment[p2])) ? 0 : 1;
   }
 
   return s;
@@ -266,12 +275,13 @@ int main(int argc, char** argv) {
       memcpy(tmpstate, pstate, sizeof(struct state) + people_num*sizeof(int));
 #if 0
       swap(tmpstate->assignment, i, tmpstate->assigned);
-#else
+#elif 0
       int tmpval = tmpstate->assignment[i];
       for(j=i; j>tmpstate->assigned; j--) {
 	tmpstate->assignment[j] = tmpstate->assignment[j-1];
       }
       tmpstate->assignment[tmpstate->assigned] = tmpval;
+#else
 #endif
       tmpstate->assigned++;
       if(tmpstate->assigned == tmpstate->total) {
