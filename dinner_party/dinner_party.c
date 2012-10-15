@@ -43,6 +43,9 @@
 #define DEBUGMSG(cond, msg) 
 #endif
 
+#define RUN_TIME 60
+#define MAX_WASTE_NUM 1000000
+
 // definition of structures
 /*
  *      0   2   4      n-2
@@ -69,6 +72,8 @@ int people_num;
 int* preference = NULL;
 struct state* goal = NULL;
 int update_num = 0;
+int wasted_num = 0;
+int back_depth = 0;
 
 void copyright() {
   printf("dinner_party version 1.00.0\n");
@@ -239,7 +244,7 @@ int main(int argc, char** argv) {
 
   // begin the real work
   struct itimerval timersetting;
-  timersetting.it_value.tv_sec = 60;
+  timersetting.it_value.tv_sec = RUN_TIME;
   timersetting.it_value.tv_usec = 0;
   timersetting.it_interval.tv_sec = 0;
   timersetting.it_interval.tv_usec = 0;
@@ -263,6 +268,8 @@ int main(int argc, char** argv) {
     pstate->assignment[i] = i;
   }
   push(pstate);
+
+  back_depth = people_num;
 
   while(!empty() && !stopworking) {
     pstate = (struct state*)pop();
@@ -402,8 +409,11 @@ int main(int argc, char** argv) {
 	  free(goal);
 	  goal = tmpstate;
 	  update_num++;
+	  wasted_num = 0;
+	  back_depth = people_num;
 	} else {
 	  free(tmpstate);
+	  wasted_num++;
 	}
       } else {
 	push(tmpstate);
@@ -411,6 +421,21 @@ int main(int argc, char** argv) {
     }
     free(ind);
     free(pstate);
+    if(wasted_num == MAX_WASTE_NUM) {
+      wasted_num = 0;
+      if(back_depth > 1) {
+	back_depth--;
+      }
+      while(!empty()) {
+	pstate = (struct state*)pop();
+	if(pstate->assigned == back_depth) {
+	  push(pstate);
+	  break;
+	} else {
+	  free(pstate);
+	}
+      }
+    }
   }
   dump_state(goal);
   printf("updated %d times\n", update_num);
