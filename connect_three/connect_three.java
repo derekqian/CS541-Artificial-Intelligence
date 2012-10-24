@@ -36,7 +36,7 @@ class State {
 	    }
 	}
     }
-    public void display() {
+    public void Display() {
 	System.out.println("+-----------+");
 	for(int i=0; i<HEIGHT; i++) {
 	    System.out.print('|');
@@ -57,22 +57,110 @@ class State {
 		list.add(i);
 	    }
 	}
+	return list;
     }
-    public void result(int action) {
-
+    public void Result(int action) {
+	for(int i=0; i<HEIGHT; i++) {
+	    if(board[i][action] == BLANK) {
+		if(player == MAX) {
+		    board[i][action] = MAX;
+		    player = MIN;
+		} else {
+		    board[i][action] = MIN;
+		    player = MAX;
+		}
+		break;
+	    }
+	}
+    }
+    public void DeResult(int action) {
+	for(int i=HEIGHT-1; i>=0; i--) {
+	    if(board[i][action] != BLANK) {
+		board[i][action] = BLANK;
+		break;
+	    }
+	}
+    }
+    private boolean Win(char player) {
+	for(int i=0; i<HEIGHT; i++) {
+	    if(board[i][0]==player && board[i][1]==player && board[i][2]==player) {
+		return true;
+	    }
+	}
+	for(int i=0; i<HEIGHT-3; i++) {
+	    if(board[i][0]==player && board[i+1][1]==player && board[i+2][2]==player) {
+		return true;
+	    }
+	    if(board[i][2]==player && board[i+1][1]==player && board[i+2][0]==player) {
+		return true;
+	    }
+	    if(board[i][0]==player && board[i+1][0]==player && board[i+2][0]==player) {
+		return true;
+	    }
+	    if(board[i][1]==player && board[i+1][1]==player && board[i+2][1]==player) {
+		return true;
+	    }
+	    if(board[i][2]==player && board[i+1][2]==player && board[i+2][2]==player) {
+		return true;
+	    }
+	}
+	return false;
+    }
+    public boolean Terminal() {
+	if(Win(MAX) || Win(MIN)) {
+	    return true;
+	} else if(board[HEIGHT-1][0]!=BLANK && board[HEIGHT-1][1]!=BLANK && board[HEIGHT-1][2]!=BLANK) {
+	    return true;
+	}
+	return false;
+    }
+    public int Utility() {
+	if(Win(MAX)) {
+	    return 1;
+	} else if(Win(MIN)) {
+	    return -1;
+	} else {
+	    return 0;
+	}
     }
 }
 
 class connect_three {
-    private State state;
-    public connect_three() {
-	state = new State();
+    public int Minimax(State s) {
+	if(s.Terminal()) {
+	    return s.Utility();
+	} else if(s.Player() == State.MAX) {
+	    int max = -2;
+	    ArrayList<Integer> actions = s.Actions();
+	    for(Integer action : actions) {
+		s.Result(action);
+		int temp = Minimax(s);
+		if(max < temp) {
+		    max = temp;
+		}
+		s.DeResult(action);
+	    }
+	    return max;
+	} else {
+	    int min = 2;
+	    ArrayList<Integer> actions = s.Actions();
+	    for(Integer action : actions) {
+		s.Result(action);
+		int temp = Minimax(s);
+		if(min > temp) {
+		    min = temp;
+		}
+		s.DeResult(action);
+	    }
+	    return min;
+	}
     }
-    public void print() {
-	state.display();
+    public connect_three() {
     }
     public static void main(String[] args) {
 	connect_three ct = new connect_three();
-	ct.print();
+	State state = new State(4,State.MAX);
+	state.Display();
+	System.out.println("first: " + ct.Minimax(state));
     }
 }
