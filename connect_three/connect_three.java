@@ -57,7 +57,6 @@ class State {
 		list.add(i);
 	    }
 	}
-	System.out.println(list);
 	return list;
     }
     public void Result(int action) {
@@ -129,9 +128,7 @@ class State {
 
 class connect_three {
     public int Minimax(State s) {
-	s.Display();
 	if(s.Terminal()) {
-	    System.out.println("Utility: " + s.Utility());
 	    return s.Utility();
 	} else if(s.Player() == State.MAX) {
 	    int max = -2;
@@ -144,7 +141,6 @@ class connect_three {
 		}
 		s.DeResult(action);
 	    }
-	    //assert(false);
 	    return max;
 	} else {
 	    int min = 2;
@@ -163,9 +159,46 @@ class connect_three {
     public connect_three() {
     }
     public static void main(String[] args) {
+	int score;
 	connect_three ct = new connect_three();
-	//State state = new State(4,State.MAX);
-	State state = new State(4,State.MIN);
-	System.out.println("first: " + ct.Minimax(state));
+	State state;
+	state = new State(4,State.MAX);
+	score = ct.Minimax(state);
+	if(score == 0) {
+	    System.out.println("MAX play first, the result is a draw.");
+	} else if(score == 1) {
+	    System.out.println("MAX play firtst, and he wins.");
+	} else {
+	    System.out.println("MAX play firtst, and he fails.");
+	}
+	state = new State(4,State.MIN);
+	score = ct.Minimax(state);
+	if(score == 0) {
+	    System.out.println("MIN play first, the result is a draw.");
+	} else if(score == 1) {
+	    System.out.println("MIN play firtst, and he wins.");
+	} else {
+	    System.out.println("MIN play firtst, and he fails.");
+	}
+	for(int i=4; i<11; i++) {
+	    state = new State(i,State.MAX);
+	    score = ct.Minimax(state);
+	    if(score == 0) {
+		System.out.format("[3x%d] MAX play first, the result is a draw.", i);
+	    } else if(score == 1) {
+		System.out.format("[3x%d] MAX play firtst, and he wins.", i);
+	    } else {
+		System.out.format("[3x%d] MAX play firtst, and he fails.", i);
+	    }
+	    state = new State(i,State.MIN);
+	    score = ct.Minimax(state);
+	    if(score == 0) {
+		System.out.format("[3x%d] MIN play first, the result is a draw.\n", i);
+	    } else if(score == 1) {
+		System.out.format("[3x%d] MIN play firtst, and he wins.\n", i);
+	    } else {
+		System.out.format("[3x%d] MIN play firtst, and he fails.\n", i);
+	    }
+	}
     }
 }
