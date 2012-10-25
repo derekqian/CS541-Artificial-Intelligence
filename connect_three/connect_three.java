@@ -21,11 +21,14 @@ class State {
     public static final char MAX = 'O';
     public static final char MIN = 'X';
     public int HEIGHT;
+    private int[] VHEIGHT;
     private char[][] board;
     private char player;
 
     public State(int height, char firstplayer) {
 	HEIGHT = height;
+	VHEIGHT = new int[WIDTH];
+	resetVHeight();
 	player = firstplayer;
 	board = new char[HEIGHT][WIDTH];
 	if(board != null) {
@@ -34,6 +37,32 @@ class State {
 		    board[i][j] = BLANK;
 		}
 	    }
+	}
+    }
+
+    /*
+     * depth: the search depth for each column
+     */
+    public void setVHeight(int depth) {
+	for(int i=0; i<WIDTH; i++) {
+	    int j;
+	    for(j=0; j<HEIGHT; j++) {
+		if(board[j][i]==BLANK) {
+		    break;
+		}
+	    }
+	    int h = j + depth;
+	    if(h >= HEIGHT) {
+		h = HEIGHT;
+	    } else if((HEIGHT-h)%2 == 1) {
+		h--;
+	    }
+	    VHEIGHT[i] = h;
+	}
+    }
+    public void resetVHeight() {
+	for(int i=0; i<WIDTH; i++) {
+	    VHEIGHT[i] = HEIGHT;
 	}
     }
     public void Display() {
@@ -53,79 +82,10 @@ class State {
 	return player;
     }
     public ArrayList<Integer> Actions() {
-	int[] index = new int[3];
 	ArrayList<Integer> list = new ArrayList<Integer>();
 	for(int i=0; i<WIDTH; i++) {
-	    int j;
-	    for(j=0; j<HEIGHT; j++) {
-		if(board[j][i] == BLANK) {
-		    break;
-		}
-	    }
-	    index[i] = j;
-	    //if(board[HEIGHT-1][i] == BLANK) {
-	    //list.add(i);
-	    //}
-	}
-	if(index[0]<=index[1] && index[1]<=index[2]) {
-	    if(index[0] != HEIGHT) {
-		list.add(0);
-	    }
-	    if(index[1] != HEIGHT) {
-		list.add(1);
-	    }
-	    if(index[2] != HEIGHT) {
-		list.add(2);
-	    }
-	} else if(index[0]<=index[2] && index[2]<=index[1]) {
-	    if(index[0] != HEIGHT) {
-		list.add(0);
-	    }
-	    if(index[2] != HEIGHT) {
-		list.add(2);
-	    }
-	    if(index[1] != HEIGHT) {
-		list.add(1);
-	    }
-	} else if(index[1]<=index[0] && index[0]<=index[2]) {
-	    if(index[1] != HEIGHT) {
-		list.add(1);
-	    }
-	    if(index[0] != HEIGHT) {
-		list.add(0);
-	    }
-	    if(index[2] != HEIGHT) {
-		list.add(2);
-	    }
-	} else if(index[1]<=index[2] && index[2]<=index[0]) {
-	    if(index[1] != HEIGHT) {
-		list.add(1);
-	    }
-	    if(index[2] != HEIGHT) {
-		list.add(2);
-	    }
-	    if(index[0] != HEIGHT) {
-		list.add(0);
-	    }
-	} else if(index[2]<=index[0] && index[0]<=index[1]) {
-	    if(index[2] != HEIGHT) {
-		list.add(2);
-	    }
-	    if(index[0] != HEIGHT) {
-		list.add(0);
-	    }
-	    if(index[1] != HEIGHT) {
-		list.add(1);
-	    }
-	} else {
-	    if(index[2] != HEIGHT) {
-		list.add(2);
-	    }
-	    if(index[1] != HEIGHT) {
-		list.add(1);
-	    }
-	    if(index[0] != HEIGHT) {
-		list.add(0);
+	    if(board[VHEIGHT[i]-1][i] == BLANK) {
+		list.add(i);
 	    }
 	}
 
@@ -182,7 +142,7 @@ class State {
     public boolean Terminal() {
 	if(Win(MAX) || Win(MIN)) {
 	    return true;
-	} else if(board[HEIGHT-1][0]!=BLANK && board[HEIGHT-1][1]!=BLANK && board[HEIGHT-1][2]!=BLANK) {
+	} else if(Actions().isEmpty()) {
 	    return true;
 	}
 	return false;
@@ -192,56 +152,6 @@ class State {
 	    return 2;
 	} else if(Win(MIN)) {
 	    return -2;
-	} else {
-	    return 0;
-	}
-    }
-    private int Candidates(char player) {
-	int num = 0;
-	player = (player==MAX) ? MIN : MAX;
-	for(int i=0; i<HEIGHT; i++) {
-	    if(board[i][0]!=player && board[i][1]!=player && board[i][2]!=player) {
-		num++;
-	    }
-	}
-	for(int i=0; i<HEIGHT-3+1; i++) {
-	    if(board[i][0]!=player && board[i+1][1]!=player && board[i+2][2]!=player) {
-		num++;
-	    }
-	    if(board[i][2]!=player && board[i+1][1]!=player && board[i+2][0]!=player) {
-		num++;
-	    }
-	    if(board[i][0]!=player && board[i+1][0]!=player && board[i+2][0]!=player) {
-		num++;
-	    }
-	    if(board[i][1]!=player && board[i+1][1]!=player && board[i+2][1]!=player) {
-		num++;
-	    }
-	    if(board[i][2]!=player && board[i+1][2]!=player && board[i+2][2]!=player) {
-		num++;
-	    }
-	}
-	return num;
-    }
-    public int Eval() {
-	if(Terminal()) {
-	    return Utility();
-	}
-	ArrayList<Integer> actions = Actions();
-	for(Integer action : actions) {
-	    Result(action);
-	    if(Terminal()) {
-		DeResult(action);
-		return Utility();
-	    }
-	    DeResult(action);
-	}
-	int max = Candidates(MAX);
-	int min = Candidates(MIN);
-	if(max > min) {
-	    return 1;
-	} else if(max < min) {
-	    return -1;
 	} else {
 	    return 0;
 	}
@@ -292,49 +202,6 @@ class connect_three {
 	    return ar;
 	}
     }
-    public ActionRes HMinimax(State s) {
-	return HMinimaxAux(s, 0);
-    }
-    private ActionRes HMinimaxAux(State s, int d) {
-	ActionRes ar = new ActionRes();
-	if(s.Terminal()) {
-	    ar.action = -1;
-	    ar.score = s.Utility();
-	    return ar;
-	} else if(d > DEPTH) {
-	    ar.action = -1;
-	    ar.score = s.Eval();
-	    return ar;
-	} else if(s.Player() == State.MAX) {
-	    ar.action = -1;
-	    ar.score = -4;
-	    ArrayList<Integer> actions = s.Actions();
-	    for(Integer action : actions) {
-		s.Result(action);
-		int temp = HMinimaxAux(s, d+1).score;
-		if(ar.score < temp) {
-		    ar.action = action;
-		    ar.score = temp;
-		}
-		s.DeResult(action);
-	    }
-	    return ar;
-	} else {
-	    ar.action = -1;
-	    ar.score = 4;
-	    ArrayList<Integer> actions = s.Actions();
-	    for(Integer action : actions) {
-		s.Result(action);
-		int temp = HMinimaxAux(s, d+1).score;
-		if(ar.score > temp) {
-		    ar.action = action;
-		    ar.score = temp;
-		}
-		s.DeResult(action);
-	    }
-	    return ar;
-	}
-    }
     public connect_three() {
     }
     public static void main(String[] args) {
@@ -365,7 +232,9 @@ class connect_three {
 	// Part two: human-computer game.
 	state = new State(10, State.MAX);
 	while(!state.Terminal()) {
-	    ActionRes ar = ct.HMinimax(state);
+	    state.setVHeight(7);
+	    ActionRes ar = ct.Minimax(state);
+	    state.resetVHeight();
 	    state.Result(ar.action);
 	    if(state.Terminal()) {
 		break;
