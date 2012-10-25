@@ -1,4 +1,9 @@
 /*
+ * connect_three version 1.00.0
+ * Copyright 2012 - 2012 Dejun Qian - electronseu@gmail.com 
+ *                                  - http://web.cecs.pdx.edu/~dejun
+ *
+ *
  * The game of Connect-Four has been widely studied. A less-widely-studied variant is Connect-Three. We will be working on Connect-Three on a board 3 wide.
  *
  * It turns out that this game is a draw with best play by both sides for any height greater than 3. Your first job is to construct a program that proves that Connect-Three on a board 3 wide and 4 high is a draw with best play by both sides, by doing a minimax search. This should require less than a minute of runtime on a reasonable machine. For the CS 441 students, this is all you need to do.
@@ -67,15 +72,15 @@ class State {
     }
     public void Display() {
 	System.out.println("=========================");
-	System.out.println("  1   2   3  ");
-	System.out.println("+-----------+");
+	System.out.println("      1   2   3  ");
+	System.out.println("    +-----------+");
 	for(int i=HEIGHT-1; i>=0; i--) {
-	    System.out.print('|');
+	    System.out.print("    |");
 	    for(int j=0; j<WIDTH; j++) {
 		System.out.format(" %s |", board[i][j]);
 	    }
 	    System.out.println();
-	    System.out.println("+-----------+");
+	    System.out.println("    +-----------+");
 	}
     }
     public char Player() {
@@ -204,14 +209,14 @@ class connect_three {
     }
     public connect_three() {
     }
-    public static void main(String[] args) {
+    public void proveDraw(int height) {
 	int score;
-	connect_three ct = new connect_three();
 	State state;
-
-	// Part one: prove 3x4 board is a draw.
-	state = new State(4,State.MAX);
-	score = ct.Minimax(state).score;
+	System.out.println("#############################################################");
+	System.out.println("# Part one: prove board 3x4 is a draw.");
+	System.out.println("#############################################################");
+	state = new State(height,State.MAX);
+	score = Minimax(state).score;
 	if(score == 0) {
 	    System.out.println("For 3x4 board, MAX play first, the result is a draw.");
 	} else if(score == 1) {
@@ -219,8 +224,8 @@ class connect_three {
 	} else {
 	    System.out.println("For 3x4 board, MAX play firtst, and he fails.");
 	}
-	state = new State(4,State.MIN);
-	score = ct.Minimax(state).score;
+	state = new State(height,State.MIN);
+	score = Minimax(state).score;
 	if(score == 0) {
 	    System.out.println("For 3x4 board, MIN play first, the result is a draw.");
 	} else if(score == 1) {
@@ -228,12 +233,17 @@ class connect_three {
 	} else {
 	    System.out.println("For 3x4 board, MIN play firtst, and he fails.");
 	}
-
-	// Part two: human-computer game.
+	System.out.println();
+    }
+    public void human_computer() {
+	State state;
+	System.out.println("#############################################################");
+	System.out.println("# Part two: human computer game with board 3x10.");
+	System.out.println("#############################################################");
 	state = new State(10, State.MAX);
 	while(!state.Terminal()) {
 	    state.setVHeight(7);
-	    ActionRes ar = ct.Minimax(state);
+	    ActionRes ar = Minimax(state);
 	    state.resetVHeight();
 	    state.Result(ar.action);
 	    if(state.Terminal()) {
@@ -243,7 +253,7 @@ class connect_three {
 
 	    String s = null;
 	    try {
-		System.out.print('-');
+		System.out.print("1, 2, 3 for move, q to quit: ");
 		BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
 		while((s = stdin.readLine())!=null && s.length()!=0) {
 		    if((s.charAt(0)=='q')) {
@@ -279,5 +289,14 @@ class connect_three {
 		System.out.println("Draw!");
 	    }
 	}
+    }
+    public static void main(String[] args) {
+	connect_three ct = new connect_three();
+
+	// Part one: prove 3x4 board is a draw.
+	ct.proveDraw(4);
+
+	// Part two: human-computer game.
+	ct.human_computer();
     }
 }

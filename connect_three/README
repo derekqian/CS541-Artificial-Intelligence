@@ -1,111 +1,36 @@
 1. How It Works.
 
-The search space for this assignment is the partial assignment of the people to the seats.
+For the first part, Minimax search is used to completely explore all the state space. The prove is conducted in two steps. In first step, we let MAX play first, and use Minimax search to show that the best result for MAX is a draw. In second step, we let MIN play first, by the same way, we show the best result for MIN is also a draw. This way, we proved that Connect-Three on a board 3 width and 4 height is a draw with best play by both sides.
 
-Deepening search is used in this implementation to prune bad states. A different approach is used here. In this approach, a limit is set so that if a certain amount of iterations have finished before finding a better state, then the search procedure will back track to a pre-defined depth. This way, we can control the search process through two parameters: 1, depth. 2, states visited in each iteration. By adjusting these two parameters, we can easily search over the whole state space or focus on some point.
+For the second part, as a complete search take too much time, we set a search depth to let the decision be made in less than 3 seconds. Instead of using the traditional depth which is the depth of the search tree, we set a search depth for each column on the board, which means we assume in each column, we can drop in at most depth many discs. This idea is based on the nature of the game that the new disc come only ocuppy the lowest available space. We think the lower the available space is, the more important the space is. We would like to spend our limited time to search the state spaces related to these lower available spaces first.
 
-Heuritics are also used here. Each iteration, we greedily explore the best candidate based on current state space. This way, we tend to hit good state earlier.
+We choose the parameter depth by the experiment extended from the first part. We do the same experiment except with board 3x4 - 3x10, and we measure the time for the computer to get the result, then a depth which lead to a reasonable time is chosen.
 
-We also designed a procedure that rotate the seats when a complete state is found. This way, we put the neighbors that don't like each other most at the two sides of the table.
+A simple algorithm is used to evaluation the score for the partial state. We simply treat it as a draw. Although it is simple, it works in our algorithm very well.
 
+The advantage of our algorithm in part two is that it need very little change to the algorithm of part one to form the algorithm in part two. Just a few lines of code are needed.
 
 2. How to Build
 
 In code directory, type "make".
 
-
 3. How to Run
 
-In command line environment, type "./dinner_party hw1-inst1.txt" or "./dinner_party <hw1-inst1.txt >hw1-soln1.txt" for hw1-inst1.txt. The same will be for the other two input file.
+In command line environment, type "java connect_three".
 
 
 4. Experiment
 
 The experiment is conducted in "linux.cecs.pdx.edu".
 
-The result for "hw1-inst1.txt" is as following:
+For the first part, the experiment shows that Connect-Three on a board 3x4 is a draw when we set MAX and MIN play first respectively. The result comes out less than 1 second.
 
-100
-2 0
-9 1
-5 2
-8 3
-4 4
-1 5
-6 6
-7 7
-3 8
-0 9
+We also did the same experiment for the board 3x5, 3x6, 3x7, 3x8, 3x9. Board 3x5 and 3x6 completed quickly like 3x4, while 3x7 takes 2 to 3 seconds and 3x8 takes about 30 seconds. Board 3x9 takes much longer time, but still finished within 10 minutes. However, I didn't get the patience to see the result for board 3x10. The results here are used in homework part two to choose the search parameter depth of our algotithm.
 
-The result for "hw1-inst2.txt" is as following:
-
-557
-0 0
-10 1
-9 2
-23 3
-6 4
-8 5
-28 6
-15 7
-24 8
-14 9
-19 10
-18 11
-5 12
-4 13
-17 14
-25 15
-11 16
-7 17
-13 18
-2 19
-27 20
-26 21
-1 22
-20 23
-22 24
-29 25
-3 26
-12 27
-21 28
-16 29
-
-The result for "hw1-inst3.txt" is as following:
-
-96
-3 0
-8 1
-15 2
-2 3
-23 4
-10 5
-21 6
-17 7
-20 8
-26 9
-14 10
-27 11
-18 12
-24 13
-1 14
-22 15
-28 16
-11 17
-29 18
-4 19
-19 20
-25 21
-12 22
-9 23
-13 24
-16 25
-7 26
-0 27
-5 28
-6 29
-
+For the second part, different from the previous version, with the algorithm in this version, the computer performs really good. I tried my best, and he beat me easily.
 
 5. Things Learned
 
-When the number of people is 30, the whole state space is really huge. Just a very tiny percent of the space can be expored in 60s. When using blind search, the result is not good because most of time, the program is searching in a relatively bad corner of the space. To solve this problem, we introduced deepening search to skim over the whole space, which lead to a chance to avoid keeping searching in bad corner. Heuristics can also help to get to better spaces earlier.
+The algorithm depends on the actually problem heavily. In our last algorithm, we tried the algorithm illustrated in the reading material. This is a genaral algorithm to acheive imperfect real-time decisions. We added a lot of code based on minimax, however, the result is not competable. I can easily beat the computer with that algorithm. The algorithm used now adopted some specific charactor to this problem. It need few amendment to minimax and works very well.
+
+Fancy algorithm doesn't guarantee good result. In previous algorithm, we designed a complicated method to evaluate the score for partial state, while in this algorithm, we just simply treat it as a draw. However, the later perfoms better.
