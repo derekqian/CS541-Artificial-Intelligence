@@ -38,7 +38,7 @@ class State {
     }
     public void Display() {
 	System.out.println("+-----------+");
-	for(int i=0; i<HEIGHT; i++) {
+	for(int i=HEIGHT-1; i>=0; i--) {
 	    System.out.print('|');
 	    for(int j=0; j<WIDTH; j++) {
 		System.out.format(" %s |", board[i][j]);
@@ -57,6 +57,7 @@ class State {
 		list.add(i);
 	    }
 	}
+	System.out.println(list);
 	return list;
     }
     public void Result(int action) {
@@ -77,6 +78,7 @@ class State {
 	for(int i=HEIGHT-1; i>=0; i--) {
 	    if(board[i][action] != BLANK) {
 		board[i][action] = BLANK;
+		player = player==MAX ? MIN : MAX;
 		break;
 	    }
 	}
@@ -87,7 +89,7 @@ class State {
 		return true;
 	    }
 	}
-	for(int i=0; i<HEIGHT-3; i++) {
+	for(int i=0; i<HEIGHT-3+1; i++) {
 	    if(board[i][0]==player && board[i+1][1]==player && board[i+2][2]==player) {
 		return true;
 	    }
@@ -127,7 +129,9 @@ class State {
 
 class connect_three {
     public int Minimax(State s) {
+	s.Display();
 	if(s.Terminal()) {
+	    System.out.println("Utility: " + s.Utility());
 	    return s.Utility();
 	} else if(s.Player() == State.MAX) {
 	    int max = -2;
@@ -140,6 +144,7 @@ class connect_three {
 		}
 		s.DeResult(action);
 	    }
+	    //assert(false);
 	    return max;
 	} else {
 	    int min = 2;
@@ -159,8 +164,8 @@ class connect_three {
     }
     public static void main(String[] args) {
 	connect_three ct = new connect_three();
-	State state = new State(4,State.MAX);
-	state.Display();
+	//State state = new State(4,State.MAX);
+	State state = new State(4,State.MIN);
 	System.out.println("first: " + ct.Minimax(state));
     }
 }
