@@ -126,34 +126,46 @@ class State {
     }
 }
 
+class ActionRes {
+    public int action;
+    public int score;
+}
+
 class connect_three {
-    public int Minimax(State s) {
+    public ActionRes Minimax(State s) {
+	ActionRes ar = new ActionRes();
 	if(s.Terminal()) {
-	    return s.Utility();
+	    ar.action = -1;
+	    ar.score = s.Utility();
+	    return ar;
 	} else if(s.Player() == State.MAX) {
-	    int max = -2;
+	    ar.action = -1;
+	    ar.score = -2;
 	    ArrayList<Integer> actions = s.Actions();
 	    for(Integer action : actions) {
 		s.Result(action);
-		int temp = Minimax(s);
-		if(max < temp) {
-		    max = temp;
+		int temp = Minimax(s).score;
+		if(ar.score < temp) {
+		    ar.action = action;
+		    ar.score = temp;
 		}
 		s.DeResult(action);
 	    }
-	    return max;
+	    return ar;
 	} else {
-	    int min = 2;
+	    ar.action = -1;
+	    ar.score = 2;
 	    ArrayList<Integer> actions = s.Actions();
 	    for(Integer action : actions) {
 		s.Result(action);
-		int temp = Minimax(s);
-		if(min > temp) {
-		    min = temp;
+		int temp = Minimax(s).score;
+		if(ar.score > temp) {
+		    ar.action = action;
+		    ar.score = temp;
 		}
 		s.DeResult(action);
 	    }
-	    return min;
+	    return ar;
 	}
     }
     public connect_three() {
@@ -165,7 +177,7 @@ class connect_three {
 
 	// Part one: prove 3x4 board is a draw.
 	state = new State(4,State.MAX);
-	score = ct.Minimax(state);
+	score = ct.Minimax(state).score;
 	if(score == 0) {
 	    System.out.println("For 3x4 board, MAX play first, the result is a draw.");
 	} else if(score == 1) {
@@ -174,7 +186,7 @@ class connect_three {
 	    System.out.println("For 3x4 board, MAX play firtst, and he fails.");
 	}
 	state = new State(4,State.MIN);
-	score = ct.Minimax(state);
+	score = ct.Minimax(state).score;
 	if(score == 0) {
 	    System.out.println("For 3x4 board, MIN play first, the result is a draw.");
 	} else if(score == 1) {
