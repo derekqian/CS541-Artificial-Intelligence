@@ -162,43 +162,27 @@ class connect_three {
 	int score;
 	connect_three ct = new connect_three();
 	State state;
+
+	// Part one: prove 3x4 board is a draw.
 	state = new State(4,State.MAX);
 	score = ct.Minimax(state);
 	if(score == 0) {
-	    System.out.println("MAX play first, the result is a draw.");
+	    System.out.println("For 3x4 board, MAX play first, the result is a draw.");
 	} else if(score == 1) {
-	    System.out.println("MAX play firtst, and he wins.");
+	    System.out.println("For 3x4 board, MAX play firtst, and he wins.");
 	} else {
-	    System.out.println("MAX play firtst, and he fails.");
+	    System.out.println("For 3x4 board, MAX play firtst, and he fails.");
 	}
 	state = new State(4,State.MIN);
 	score = ct.Minimax(state);
 	if(score == 0) {
-	    System.out.println("MIN play first, the result is a draw.");
+	    System.out.println("For 3x4 board, MIN play first, the result is a draw.");
 	} else if(score == 1) {
-	    System.out.println("MIN play firtst, and he wins.");
+	    System.out.println("For 3x4 board, MIN play firtst, and he wins.");
 	} else {
-	    System.out.println("MIN play firtst, and he fails.");
+	    System.out.println("For 3x4 board, MIN play firtst, and he fails.");
 	}
-	for(int i=4; i<11; i++) {
-	    state = new State(i,State.MAX);
-	    score = ct.Minimax(state);
-	    if(score == 0) {
-		System.out.format("[3x%d] MAX play first, the result is a draw.", i);
-	    } else if(score == 1) {
-		System.out.format("[3x%d] MAX play firtst, and he wins.", i);
-	    } else {
-		System.out.format("[3x%d] MAX play firtst, and he fails.", i);
-	    }
-	    state = new State(i,State.MIN);
-	    score = ct.Minimax(state);
-	    if(score == 0) {
-		System.out.format("[3x%d] MIN play first, the result is a draw.\n", i);
-	    } else if(score == 1) {
-		System.out.format("[3x%d] MIN play firtst, and he wins.\n", i);
-	    } else {
-		System.out.format("[3x%d] MIN play firtst, and he fails.\n", i);
-	    }
-	}
+
+	// Part two: human-computer game.
     }
 }
