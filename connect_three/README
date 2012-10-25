@@ -10,6 +10,8 @@ A simple algorithm is used to evaluation the score for the partial state. We sim
 
 The advantage of our algorithm in part two is that it need very little change to the algorithm of part one to form the algorithm in part two. Just a few lines of code are needed.
 
+A git repository is included. The previous rersion of algorithm can be found there.
+
 2. How to Build
 
 In code directory, type "make".
