@@ -293,9 +293,11 @@ class connect_three {
     public void computer_computer() {
 	State state;
 	System.out.println("#############################################################");
-	System.out.println("# Part fun: human computer game with board 3x10.");
+	System.out.println("# Part fun: computer-computer game with board 3x10.");
 	System.out.println("#############################################################");
 	state = new State(10, State.MAX);
+	//state.Result(2); // choose the first step manually, this will lead a win, suprise :)
+	//state.Display();
 	while(!state.Terminal()) {
 	    state.setVHeight(7);
 	    ActionRes ar = Minimax(state);
