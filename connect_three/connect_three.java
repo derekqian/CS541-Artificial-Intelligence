@@ -290,11 +290,35 @@ class connect_three {
 	    }
 	}
     }
+    public void computer_computer() {
+	State state;
+	System.out.println("#############################################################");
+	System.out.println("# Part fun: human computer game with board 3x10.");
+	System.out.println("#############################################################");
+	state = new State(10, State.MAX);
+	while(!state.Terminal()) {
+	    state.setVHeight(7);
+	    ActionRes ar = Minimax(state);
+	    state.resetVHeight();
+	    state.Result(ar.action);
+	    state.Display();
+	}
+	if(state.Win(State.MAX)) {
+	    System.out.println("Computer 1 win!");
+	} else if(state.Win(State.MIN)) {
+	    System.out.println("Computer 2 win!");
+	} else {
+	    System.out.println("Draw!");
+	}
+    }
     public static void main(String[] args) {
 	connect_three ct = new connect_three();
 
 	// Part one: prove 3x4 board is a draw.
 	ct.proveDraw(4);
+
+	// Part fun: computer-computer game.
+	//ct.computer_computer();
 
 	// Part two: human-computer game.
 	ct.human_computer();
