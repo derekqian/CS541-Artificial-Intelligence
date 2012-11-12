@@ -1,0 +1,32 @@
+1. How It Works.
+
+This program implements a Naive Bayesian learner. It's composed of two phases. The first phase is trainning phase. In this phase, it receives a file containing trainning data. Based on these data, it calculates the probabilities like P(H) and P(E|H). The second phase is classifying phase. In this phase, given a instance, we calculate the likelihood for normal and anomaly respectively. Then we classify the instance as normal if the likelihood of normal is greater, otherwise we classify the instance as anomaly.
+
+After training with the training data, the program read test data from a test file, which includes a bunch of instances. The program classifies each instance based on the parameter resulted in the training phase. After that, the program calculate the fraction of instances that are classified correctly, the fraction of class-0 instances that are classified correctly and the fraction of class-1 instances that are classified correctly.
+
+In this application, accuracy on abnormal instances is more important than the accuracy on normal instances, as failing the predict on abnormal instances will cost the lives of human beings. We tested our implementation on three data sets provided with the homework. The result shows that dataset itg gives the best result.
+
+A git repository is included.
+
+
+2. How to Build
+
+In code directory, type "make".
+
+
+3. How to Run
+
+In code directory, type "make test".
+
+
+4. Experiment
+
+The experiment is conducted in "linux.cecs.pdx.edu". The results for the dataset given with the homework are shown bellow,
+
+orig 142/187(0.76) 10/15(0.67) 132/172(0.77)
+itg 167/187(0.89) 13/15(0.87) 154/172(0.90)
+resplit 74/90(0.82) 16/19(0.84) 58/71(0.82)
+
+5. Things Learned
+
+itg dataset gives the best result of the three which means that re-quantizing the feature values can help classifying the instances. From the result, we can also see the result that the dataset of resplit is better than the dataset of orig, this means resplit the dataset and carefully choosing training dataset will also help improving the result.
