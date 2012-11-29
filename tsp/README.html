@@ -1,0 +1,100 @@
+<h1>Final Exam / Project</h1>
+
+<p>CS 441 / 541 Fall 2012 <br />
+Bart Massey</p>
+
+<p>For this assignment, you will be tackling the well-known
+"Travelling Salesperson Problem".</p>
+
+<p>Your job will be to use an AI method to find a shortest tour
+of various Oregon cities. As you know, the tour must visit
+each city at least once, and end at the same city it starts
+at.</p>
+
+<p>The files you need to complete this assignment are in the
+file <code>final.zip</code> on the Week 10 schedule page on the Moodle.</p>
+
+<p>The data source for this problem is a highly-sanitized
+version of a 2012
+<a href="http://www.oregon.gov/ODOT/TD/TDATA/otms/docs/mileagechart.pdf">table</a>
+of highway mileages between Oregon cities provided by the
+Oregon Department of Transportation. You can look at an
+Oregon map to find the locations of these cities if you are
+curious. (It will be legal to visit these cities more than
+once on your tour, from a highway perspective, but you must
+list each city only once---this is the visit that "counts".)</p>
+
+<p>The file <code>oregon-mileage.txt</code> contains mileages between
+pairs of cities in Oregon in an obvious format. The file is
+redundant, in that the distance from city A to city B is
+given, and the identical distance from city B to city A is
+also given.  This is version 2 of this file; it has errors
+corrected and entries added compared to the first version.</p>
+
+<p>The files <code>small-instance.txt</code>, <code>medium-instance.txt</code> and
+<code>large-instance.txt</code> contain lists of cities to tour. The
+large instance is simply every listed Oregon city.</p>
+
+<p>You should limit yourselves to 60 seconds of computation per
+run, as usual. Find the best solution you can, but it need
+not be optimal.</p>
+
+<p>You have several choices of method as discussed in this
+course:</p>
+
+<ul>
+<li>Complete Search</li>
+<li>Local Search</li>
+<li>Genetic Algorithm</li>
+<li>"Ant Trail" (see the course text)</li>
+</ul>
+
+<p>If you want to try something else, please talk to me first.</p>
+
+<p>Undergraduates (CS 441) may use the "Ant Trail" code from
+the course text as part of their solution, but graduates may
+not (although they may use the "Ant Trail" approach).</p>
+
+<p>Here is an example instance:</p>
+
+<pre><code>    Bend
+    Coos.Bay
+    Ontario
+    Portland
+    Roseburg
+</code></pre>
+
+<p>and here is an optimal solution to that instance, obtained
+by stupid brute force (compare all possible solutions):</p>
+
+<pre><code>    1123
+    Bend
+    Ontario
+    Portland
+    Coos.Bay
+    Roseburg
+    Bend
+</code></pre>
+
+<p>Please display your solutions in the format shown:</p>
+
+<pre><code>    &lt;mileage&gt;
+    &lt;first city&gt;
+    ...
+    &lt;last city&gt;
+    &lt;first city&gt;
+</code></pre>
+
+<p>Further, for the sake of being able to compare solutions,
+please show your tour starting with the first city in
+alphabetical order (Bend, in this instance), and continuing
+with the neighbor of that city that is earlier in
+alphabetical order (Ontario comes before Roseburg in this
+instance).</p>
+
+<hr />
+
+<p>As usual, turn in your code, your results, and a writeup. I
+am especially interested in the writeup on this one: please
+say how your approach worked, and what you think might be
+improved.</p>
