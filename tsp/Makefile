@@ -1,6 +1,7 @@
 all : tsp.java
 	javac tsp.java
 	javac tsp_node.java
+	javac tsp_edge.java
 
 test :
 	@java -ea tsp oregon-mileage.txt test-instance.txt

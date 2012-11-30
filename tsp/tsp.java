@@ -59,8 +59,18 @@ class tsp {
 	List<String> instance = _tsp.readInstanceFile(args[1]);
 	System.out.println(instance);
 
+	List<Integer> result;
+
+	// _tsp_node
+	System.out.println("==============================");
 	tsp_node _tsp_node = new tsp_node();
-	List<Integer> result = _tsp_node.getTravel(mileage, instance);
+	result = _tsp_node.getTravel(mileage, instance);
+	System.out.println(result);
+
+	// _tsp_edge
+	System.out.println("==============================");
+	tsp_edge _tsp_edge = new tsp_edge();
+	result = _tsp_edge.getTravel(mileage, instance);
 	System.out.println(result);
     }
 }
