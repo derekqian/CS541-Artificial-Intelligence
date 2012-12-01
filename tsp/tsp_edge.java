@@ -32,6 +32,7 @@ class tsp_edge {
     private class State {
 	public List<Set<Edge>> visitededge;
 	public List<Set<Integer>> visitednode;
+	public List<Set<Integer>> visitedendpoint;
 	public List<Edge> unvisited;
 	public int mileage;
 	public State(State state) {
@@ -43,12 +44,17 @@ class tsp_edge {
 	    for(Set<Integer> nset : state.visitednode) {
 		visitednode.add(new HashSet<Integer>(nset));
 	    }
+	    visitedendpoint = new LinkedList<Set<Integer>>();
+	    for(Set<Integer> pset : state.visitedendpoint) {
+		visitedendpoint.add(new HashSet<Integer>(pset));
+	    }
 	    unvisited = new LinkedList<Edge>(state.unvisited);
 	    mileage = state.mileage;
 	}
 	public State(List<Edge> unvisited) {
 	    this.visitededge = new LinkedList<Set<Edge>>();
 	    this.visitednode = new LinkedList<Set<Integer>>();
+	    this.visitedendpoint = new LinkedList<Set<Integer>>();
 	    this.unvisited = new LinkedList<Edge>(unvisited);
 	    this.mileage = 0;
 	}
@@ -61,9 +67,12 @@ class tsp_edge {
 	}
 	@Override
 	public String toString() {
-	    return "<"+visitededge+visitednode+unvisited+mileage+">";
+	    return "<"+visitededge+visitednode+visitedendpoint+unvisited+mileage+">";
 	}
     }
+
+    private boolean stop = false;
+    private Timer timer = null;
 
     public tsp_edge() {
     }
@@ -79,25 +88,36 @@ class tsp_edge {
     }
     public List<Integer> getTravel(Map<String, Integer> mileage, List<String> instance) {
 	List<Edge> adjacent = formAjacencyList(mileage, instance);
-	System.out.println(adjacent);
+	//System.out.println(adjacent);
 	Collections.sort(adjacent);
-	System.out.println(adjacent);
+	//System.out.println(adjacent);
+
+	timer = new Timer();
+	timer.schedule(new TimerTask() {
+		@Override
+		public void run() {
+		    stop = true;
+		    timer.cancel();
+		}
+	    }, 60*1000);
 
 	List<Set<Edge>> visitededge;
 	List<Set<Integer>> visitednode;
+	List<Set<Integer>> visitedendpoint;
 	List<Edge> unvisited = new LinkedList<Edge>(adjacent);
 	State state = new State(unvisited);
-	System.out.println(state);
+	//System.out.println(state);
 	Stack<State> stack = new Stack<State>();
 	stack.push(state);
 
 	State best = null;
 
-	while(!stack.empty()) {
+	while(!stack.empty() && !stop) {
 	    state = stack.pop();
 	    //System.out.println(state);
 	    visitededge = state.visitededge;
 	    visitednode = state.visitednode;
+	    visitedendpoint = state.visitedendpoint;
 	    unvisited = state.unvisited;
 	    //System.out.println("="+state.visitededges()+"="+instance.size()+"=");
 	    if(state.visitededges() < instance.size()-1) {
@@ -114,13 +134,21 @@ class tsp_edge {
 		temp = new State(state);
 		Edge e = temp.unvisited.remove(0);
 		for(int i=0; i<temp.visitededge.size(); i++) {
-		    Set<Edge> se = temp.visitededge.get(i);
 		    Set<Integer> sn = temp.visitednode.get(i);
-		    if(sn.contains(e.node1)) {
+		    Set<Integer> sp = temp.visitedendpoint.get(i);
+		    if(sp.contains(e.node1)) {
 			node1 = i;
+		    } else if(sn.contains(e.node1)) {
+			node1 = i;
+			node2 = i; // make invalid
+			break;
 		    }
-		    if(sn.contains(e.node2)) {
+		    if(sp.contains(e.node2)) {
 			node2 = i;
+		    } else if(sn.contains(e.node2)) {
+			node2 = i;
+			node1 = i; // make invalid
+			break;
 		    }
 		}
 		if(node1==-1 && node2==-1) {
@@ -131,6 +159,10 @@ class tsp_edge {
 		    tn.add(e.node1);
 		    tn.add(e.node2);
 		    temp.visitednode.add(tn);
+		    Set<Integer> tp = new HashSet<Integer>();
+		    tp.add(e.node1);
+		    tp.add(e.node2);
+		    temp.visitedendpoint.add(tp);
 		    temp.mileage += e.mileage;
 		    stack.push(temp);
 		} else if(node1 == -1) {
@@ -138,6 +170,9 @@ class tsp_edge {
 		    te.add(e);
 		    Set<Integer> tn = temp.visitednode.get(node2);
 		    tn.add(e.node1);
+		    Set<Integer> tp = temp.visitedendpoint.get(node2);
+		    tp.remove(e.node2);
+		    tp.add(e.node1);
 		    temp.mileage += e.mileage;
 		    stack.push(temp);
 		} else if(node2 == -1) {
@@ -145,6 +180,9 @@ class tsp_edge {
 		    te.add(e);
 		    Set<Integer> tn = temp.visitednode.get(node1);
 		    tn.add(e.node2);
+		    Set<Integer> tp = temp.visitedendpoint.get(node1);
+		    tp.remove(e.node1);
+		    tp.add(e.node2);
 		    temp.mileage += e.mileage;
 		    stack.push(temp);
 		} else if(node1 != node2) {
@@ -157,29 +195,23 @@ class tsp_edge {
 		    Set<Integer> tn2 = temp.visitednode.get(node2);
 		    tn1.addAll(tn2);
 		    temp.visitednode.remove(tn2);
+		    Set<Integer> tp1 = temp.visitedendpoint.get(node1);
+		    Set<Integer> tp2 = temp.visitedendpoint.get(node2);
+		    tp1.addAll(tp2);
+		    tp1.remove(e.node1);
+		    tp1.remove(e.node2);
+		    temp.visitedendpoint.remove(tp2);
 		    temp.mileage += e.mileage;
 		    stack.push(temp);
 		}
-		System.out.println(state);
+		//System.out.println(state);
 	    } else if(state.visitededges() == instance.size()-1) {
-		Set<Integer> set1 = new HashSet<Integer>();
-		Set<Integer> set2 = new HashSet<Integer>();
-		for(Edge e : state.visitededge.get(0)) {
-		    if(!set1.contains(e.node1)) {
-			set1.add(e.node1);
-		    } else {
-			set2.add(e.node1);
-		    }
-		    if(!set1.contains(e.node2)) {
-			set1.add(e.node2);
-		    } else {
-			set2.add(e.node2);
-		    }
-		}
+		Set<Integer> tp = state.visitedendpoint.get(0);
 		while(!state.unvisited.isEmpty()) {
 		    Edge e = state.unvisited.get(0);
-		    if(!(set1.contains(e.node1) && set2.contains(e.node1)) && !(set1.contains(e.node2) && set2.contains(e.node2))) {
+		    if(tp.contains(e.node1) && tp.contains(e.node2)) {
 			state.visitededge.get(0).add(e);
+			state.visitedendpoint.get(0).clear();
 			state.mileage += e.mileage;
 			break;
 		    }
@@ -192,10 +224,7 @@ class tsp_edge {
 		    //throw new RuntimeException();
 		}
 	    } else {
-		System.out.println("=>"+state);
-		if(state.mileage < 1180) {
-		    throw new RuntimeException();
-		}
+		//System.out.println(state);
 		if(best == null) {
 		    best = state;
 		} else if(state.mileage < best.mileage) {
@@ -204,6 +233,44 @@ class tsp_edge {
 	    }
 	}
 
-	return null;
+	if(best == null) {
+	    return null;
+	}
+
+	Map<Integer, List<Integer>> map = new HashMap<Integer, List<Integer>>();
+	for(int i=0; i<instance.size(); i++) {
+	    map.put(i, new LinkedList<Integer>());
+	}
+	for(Edge e : best.visitededge.get(0)) {
+	    int node1 = e.node1;
+	    int node2 = e.node2;
+	    List<Integer> list1 = map.get(node1);
+	    List<Integer> list2 = map.get(node2);
+	    list1.add(node2);
+	    list2.add(node1);
+	}
+
+	List<Integer> result = new LinkedList<Integer>();
+	result.add(best.mileage);
+	Integer I1 = new Integer(0);
+	Integer I2 = null;
+	result.add(I1);
+	if(map.get(0).get(0).compareTo(map.get(0).get(1))<0) {
+	    I2 = map.get(0).get(0);
+	} else {
+	    I2 = map.get(0).get(1);
+	}
+	while(I2.intValue() != 0) {
+	    result.add(I2);
+	    List<Integer> list = map.get(I2.intValue());
+	    list.remove(I1);
+	    I1 = I2;
+	    I2 = list.get(0);
+	}
+	result.add(new Integer(0));
+
+	timer.cancel();
+
+	return result;
     }
 }

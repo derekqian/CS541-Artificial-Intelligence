@@ -35,6 +35,9 @@ class tsp_node {
 	}
     }
 
+    private boolean stop = false;
+    private Timer timer = null;
+
     public tsp_node() {
     }
     private int[][] formAjacentMatrix(Map<String, Integer> mileage, List<String> instance) {
@@ -76,7 +79,16 @@ class tsp_node {
 	    printAjacentMatrix(adjacent);
 	    return null;
 	}
-	printAjacentMatrix(adjacent);
+	//printAjacentMatrix(adjacent);
+
+	timer = new Timer();
+	timer.schedule(new TimerTask() {
+		@Override
+		public void run() {
+		    stop = true;
+		    timer.cancel();
+		}
+	    }, 60*1000);
 
 	List<Integer> visited = new LinkedList<Integer>();
 	visited.add(new Integer(0));
@@ -85,13 +97,13 @@ class tsp_node {
 	    unvisited.add(new Integer(i));
 	}
 	State state = new State(visited, unvisited, 0);
-	System.out.println(state);
+	//System.out.println(state);
 	Stack<State> stack = new Stack<State>();
 	stack.push(state);
 
 	State best = null;
 
-	while(!stack.empty()) {
+	while(!stack.empty() && !stop) {
 	    state = stack.pop();
 	    visited = state.visited;
 	    unvisited = state.unvisited;
@@ -123,10 +135,26 @@ class tsp_node {
 		} else if(state.mileage < best.mileage) {
 		    best = state;
 		}
-		System.out.println(state);
+		//System.out.println(state);
 	    }
 	}
 
-	return best.visited;
+	List<Integer> result = new LinkedList<Integer>();
+	result.add(best.mileage);
+	result.add(0);
+	if(best.visited.get(1).compareTo(best.visited.get(best.visited.size()-1)) < 0) {
+	    for(int i=1; i<best.visited.size(); i++) {
+		result.add(best.visited.get(i));
+	    }
+	} else {
+	    for(int i=best.visited.size()-1; i>0; i--) {
+		result.add(best.visited.get(i));
+	    }
+	}
+	result.add(0);
+
+	timer.cancel();
+
+	return result;
     }
 }
