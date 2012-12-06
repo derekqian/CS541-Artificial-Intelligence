@@ -1,49 +1,93 @@
-[Bend, Coos.Bay, Ontario, Portland, Roseburg]
-==============================
--1 237 260 160 192
-237 -1 498 212 85
-260 498 -1 374 453
-160 212 374 -1 177
-192 85 453 177 -1
-<[0][1, 2, 3, 4]0>
-<[0, 3, 4, 1, 2][]1180>
-<[0, 3, 4, 2, 1][]1525>
-<[0, 3, 1, 4, 2][]1170>
-<[0, 3, 1, 2, 4][]1515>
-<[0, 3, 2, 4, 1][]1309>
-<[0, 3, 2, 1, 4][]1309>
-<[0, 4, 1, 3, 2][]1123>
-<[0, 4, 1, 2, 3][]1309>
-<[0, 4, 3, 1, 2][]1339>
-<[0, 4, 3, 2, 1][]1478>
-<[0, 4, 2, 3, 1][]1468>
-<[0, 4, 2, 1, 3][]1515>
-<[0, 1, 4, 3, 2][]1133>
-<[0, 1, 4, 2, 3][]1309>
-<[0, 1, 3, 4, 2][]1339>
-<[0, 1, 3, 2, 4][]1468>
-<[0, 1, 2, 3, 4][]1478>
-<[0, 1, 2, 4, 3][]1525>
-<[0, 2, 3, 4, 1][]1133>
-<[0, 2, 3, 1, 4][]1123>
-<[0, 2, 4, 1, 3][]1170>
-<[0, 2, 4, 3, 1][]1339>
-<[0, 2, 1, 4, 3][]1180>
-<[0, 2, 1, 3, 4][]1339>
-[0, 4, 1, 3, 2]
-==============================
-[<(1,0),237>, <(2,0),260>, <(2,1),498>, <(3,0),160>, <(3,1),212>, <(3,2),374>, <(4,0),192>, <(4,1),85>, <(4,2),453>, <(4,3),177>]
-[<(4,1),85>, <(3,0),160>, <(4,3),177>, <(4,0),192>, <(3,1),212>, <(1,0),237>, <(2,0),260>, <(3,2),374>, <(4,2),453>, <(2,1),498>]
-<[][][][<(4,1),85>, <(3,0),160>, <(4,3),177>, <(4,0),192>, <(3,1),212>, <(1,0),237>, <(2,0),260>, <(3,2),374>, <(4,2),453>, <(2,1),498>]0>
-=><[[<(3,0),160>, <(4,3),177>, <(2,1),498>, <(2,0),260>, <(4,1),85>]][[0, 1, 2, 3, 4]][[]][]1180>
-=><[[<(4,0),192>, <(3,0),160>, <(3,2),374>, <(2,1),498>, <(4,1),85>]][[0, 1, 2, 3, 4]][[]][]1309>
-=><[[<(4,2),453>, <(3,0),160>, <(2,0),260>, <(3,1),212>, <(4,1),85>]][[0, 1, 2, 3, 4]][[]][]1170>
-=><[[<(4,2),453>, <(3,0),160>, <(1,0),237>, <(3,2),374>, <(4,1),85>]][[0, 1, 2, 3, 4]][[]][]1309>
-=><[[<(4,3),177>, <(1,0),237>, <(3,2),374>, <(2,0),260>, <(4,1),85>]][[0, 1, 2, 3, 4]][[]][]1133>
-=><[[<(4,0),192>, <(3,2),374>, <(2,0),260>, <(3,1),212>, <(4,1),85>]][[0, 1, 2, 3, 4]][[]][]1123>
-=><[[<(4,2),453>, <(3,0),160>, <(4,3),177>, <(1,0),237>, <(2,1),498>]][[0, 1, 2, 3, 4]][[]][]1525>
-=><[[<(4,2),453>, <(4,0),192>, <(3,0),160>, <(2,1),498>, <(3,1),212>]][[0, 1, 2, 3, 4]][[]][]1515>
-=><[[<(4,0),192>, <(4,3),177>, <(2,1),498>, <(2,0),260>, <(3,1),212>]][[0, 1, 2, 3, 4]][[]][]1339>
-=><[[<(4,0),192>, <(1,0),237>, <(4,3),177>, <(3,2),374>, <(2,1),498>]][[0, 1, 2, 3, 4]][[]][]1478>
-=><[[<(4,2),453>, <(4,3),177>, <(1,0),237>, <(2,0),260>, <(3,1),212>]][[0, 1, 2, 3, 4]][[]][]1339>
-=><[[<(4,2),453>, <(4,0),192>, <(1,0),237>, <(3,2),374>, <(3,1),212>]][[0, 1, 2, 3, 4]][[]][]1468>
+1. How It Works.
+
+A complete search algorithm is used here to solve the TSP problem. More specifically, we use the technique of hill climbing to try to put the good space states before the bad ones. The space state is defined in two ways in our implementation which leads to two approaches here.
+
+In the first approach, we define the state as a path from the beginning to the current city we have visited. To choose the next city, we select the one which has not been visited and is the nearest one from the current city. The algorithm could be illustrated as following,
+
+1. Set L to be a list of the initial node which contains the first city in the test file (the cities are already sorted in alphabetic order).
+2. Let n be the first node on L. If L is empty, output the best solution so far.
+3. If n is a feasible solution, compare it with the best one found so far. If better, change the best solution to this one.
+4. Otherwise, remove n from L. Sort n's children by their mileage and add the children to the front of L (the child with the lowest mileage should be at the front of L). Return to step 2.
+
+To see how this approach works, we choose the sample instance from the homework assignment, which is,
+
+Bend
+Coos.Bay
+Ontario
+Portland
+Roseburg
+
+With this instance, we search the whole space, the result is shown bellow,
+
+1180, 0, 3, 4, 1, 2
+1525, 0, 3, 4, 2, 1
+1170, 0, 3, 1, 4, 2
+1515, 0, 3, 1, 2, 4
+1309, 0, 3, 2, 4, 1
+1309, 0, 3, 2, 1, 4
+1123, 0, 4, 1, 3, 2
+1309, 0, 4, 1, 2, 3
+1339, 0, 4, 3, 1, 2
+1478, 0, 4, 3, 2, 1
+1468, 0, 4, 2, 3, 1
+1515, 0, 4, 2, 1, 3
+1133, 0, 1, 4, 3, 2
+1309, 0, 1, 4, 2, 3
+1339, 0, 1, 3, 4, 2
+1468, 0, 1, 3, 2, 4
+1478, 0, 1, 2, 3, 4
+1525, 0, 1, 2, 4, 3
+1133, 0, 2, 3, 4, 1
+1123, 0, 2, 3, 1, 4
+1170, 0, 2, 4, 1, 3
+1339, 0, 2, 4, 3, 1
+1180, 0, 2, 1, 4, 3
+1339, 0, 2, 1, 3, 4
+
+Each row represents a feasible solution, the first number is the total mileage, and the following is the numbers of the cities visited in order. The rows are listed in the order they are searched. We can see they are 24 feasible solutions searched, and the best solution is 1123. One observation is that there always at least two solutions with the same mileage. This is because the mileage graph is undirected, and we can always travel in the opposite direction to get the same mileage. Another solution is that although we tried the best next city first, we do not always get the the good results first. For example, the second solution is 1525, the fourth one is 1515, and they are actually the most largest two in this instance.
+
+To use the symmetric property to half the solution space, and to let the heuristic work better, we improved the first approach by let the space state be the subset of the edges in the final circle. Each iteration, we try to select the best feasible edge (with the smallest mileage) to put in the edge set. The selected edge does not necessarily to be connected to the existing edges in the set when not reaching the final state. The pseudo code is listed bellow,
+
+1. Set L to be a list of the initial node which contains the smallest edge connecting two cities.
+2. Let n be the first node on L. If L is empty, output the best solution so far.
+3. If n is a feasible solution, compare it with the best one found so far. If better, change the best solution to this one.
+4. Otherwise, remove n from L. Sort n's children by their mileage and add the children to the front of L (the child with the lowest mileage should be at the front of L). Return to step 2.
+
+Using the same instance, we get the result bellow,
+
+1180, <(3,0),160>, <(4,3),177>, <(2,1),498>, <(2,0),260>, <(4,1),85>
+1309, <(4,0),192>, <(3,0),160>, <(3,2),374>, <(2,1),498>, <(4,1),85>
+1170, <(4,2),453>, <(3,0),160>, <(2,0),260>, <(3,1),212>, <(4,1),85>
+1309, <(4,2),453>, <(3,0),160>, <(1,0),237>, <(3,2),374>, <(4,1),85>
+1133, <(4,3),177>, <(1,0),237>, <(3,2),374>, <(2,0),260>, <(4,1),85>
+1123, <(4,0),192>, <(3,2),374>, <(2,0),260>, <(3,1),212>, <(4,1),85>
+1525, <(4,2),453>, <(3,0),160>, <(4,3),177>, <(1,0),237>, <(2,1),498>
+1515, <(4,2),453>, <(4,0),192>, <(3,0),160>, <(2,1),498>, <(3,1),212>
+1339, <(4,0),192>, <(4,3),177>, <(2,1),498>, <(2,0),260>, <(3,1),212>
+1478, <(4,0),192>, <(1,0),237>, <(4,3),177>, <(3,2),374>, <(2,1),498>
+1339, <(4,2),453>, <(4,3),177>, <(1,0),237>, <(2,0),260>, <(3,1),212>
+1468, <(4,2),453>, <(4,0),192>, <(1,0),237>, <(3,2),374>, <(3,1),212>
+
+Each row represents a feasible solution, the first number is the total mileage, and the following is the edges in the circle path. We can see there are only half number of solutions here compared to the first approach. The duplicated solution have been removed. Another result is that the first half of the solutions are all bellow the second half, which means this approach tends to visit the good solutions before the bad ones.
+
+2. How to Build
+
+In code directory, type "make".
+
+3. How to Run
+
+In code directory, type "make test", or "java tsp -n oregon-mileage.txt small-instance.txt" for the first approch, or "java tsp oregon-mileage.txt small-instance.txt" for the second approach, if "small-instance.txt" is used. Similar for "medium-instance.txt" and "large-instance.txt"
+
+4. Experiment
+
+The experiment is conducted in "linux.cecs.pdx.edu".
+
+The results for "small-instance.txt" are both 1130. The details are shown in file "small-result-1.txt" and "small-result-2.txt", where "small-result-1.txt" is the result for the first approach, and "small-result-2.txt" is the result for the second approach.
+
+The results for "medium-instance.txt" are 1479 and 1515. The details are shown in file "medium-result-1.txt" and "medium-result-2.txt", where "medium-result-1.txt" is the result for the first approach, and "medium-result-2.txt" is the result for the second approach.
+
+The results for "large-instance.txt" are 1890 and 1783. The details are shown in file "large-result-1.txt" and "large-result-2.txt", where "large-result-1.txt" is the result for the first approach, and "large-result-2.txt" is the result for the second approach.
+
+5. Things Learned
+
+The second approach can cut the space by half, and it can get to the good solutions earlier, like the result for "large-instance.txt". In 60 seconds, the second approach get the better result than the first approach. However, this is not always the case, the result for "medium-instance.txt" shows that the first approach get a better solution than the second one in 60 seconds run. However, these two solutions are all good. The chance for the second one to overcome the first should be higher.
