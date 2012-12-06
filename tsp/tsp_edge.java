@@ -1,4 +1,7 @@
 /*
+ * tsp version 1.0
+ * Copyright 2012 - 2012 Dejun Qian - electronseu@gmail.com
+ *                                  - http://web.cecs.pdx.edu/~dejun
  */
 
 import java.io.*;
